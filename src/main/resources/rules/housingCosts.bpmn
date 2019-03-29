@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<definitions id="Definition"
+             targetNamespace="http://www.jboss.org/drools"
+             typeLanguage="http://www.java.com/javaTypes"
+             expressionLanguage="http://www.mvel.org/2.0"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
+             xmlns:g="http://www.jboss.org/drools/flow/gpd"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:tns="http://www.jboss.org/drools">
+
+  <process processType="Private" isExecutable="true" id="housingCostsProcess" name="housingCosts" tns:packageName="fi.kela.drools.housing" >
+
+    <extensionElements>
+     <tns:import name="org.kie.api.runtime.process.CaseAssignment" />
+     <tns:import name="fi.kela.drools.housing.AsunnonTyyppi" />
+     <tns:import name="org.kie.api.runtime.process.CaseData" />
+    </extensionElements>
+    <!-- nodes -->
+    <startEvent id="id1"  isInterrupting="true">
+    </startEvent>
+    <endEvent id="id2" >
+        <terminateEventDefinition />
+    </endEvent>
+    <businessRuleTask id="id6" name="Enimmäisasumismenot" g:ruleFlowGroup="enimmaisasumismenotProsessi" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id7" name="Ruokakunnan koko" g:ruleFlowGroup="ruokakunnanKoko" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id8" name="Omavastuu" g:ruleFlowGroup="omavastuu" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id10" name="Asumismenot" g:ruleFlowGroup="asumismenot" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id11" name="Hoitomenot" g:ruleFlowGroup="hoitomenot" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id12" name="Hoitomenojen rajaukset" g:ruleFlowGroup="hoitomeno-rajaus" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id13" name="Hoitomenojen korotukset" g:ruleFlowGroup="hoitomenot-korotukset" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="id14" name="Vammaiskorotus" g:ruleFlowGroup="vammaiskorotus" 
+ implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+
+    <!-- connections -->
+    <sequenceFlow id="id10-id2" sourceRef="id10" targetRef="id2" />
+    <sequenceFlow id="id14-id6" sourceRef="id14" targetRef="id6" />
+    <sequenceFlow id="id1-id7" sourceRef="id1" targetRef="id7" />
+    <sequenceFlow id="id12-id8" sourceRef="id12" targetRef="id8" />
+    <sequenceFlow id="id8-id10" sourceRef="id8" targetRef="id10" />
+    <sequenceFlow id="id6-id11" sourceRef="id6" targetRef="id11" />
+    <sequenceFlow id="id13-id12" sourceRef="id13" targetRef="id12" />
+    <sequenceFlow id="id11-id13" sourceRef="id11" targetRef="id13" />
+    <sequenceFlow id="id7-id14" sourceRef="id7" targetRef="id14" />
+
+  </process>
+
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="housingCostsProcess" >
+      <bpmndi:BPMNShape bpmnElement="id1" >
+        <dc:Bounds x="75" y="20" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id2" >
+        <dc:Bounds x="827" y="255" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id6" >
+        <dc:Bounds x="195" y="134" width="128" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id7" >
+        <dc:Bounds x="11" y="134" width="165" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id8" >
+        <dc:Bounds x="655" y="126" width="80" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id10" >
+        <dc:Bounds x="804" y="126" width="80" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id11" >
+        <dc:Bounds x="333" y="54" width="80" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id12" >
+        <dc:Bounds x="492" y="135" width="133" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id13" >
+        <dc:Bounds x="361" y="197" width="159" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="id14" >
+        <dc:Bounds x="172" y="227" width="80" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="id10-id2" >
+        <di:waypoint x="844" y="150" />
+        <di:waypoint x="851" y="279" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id14-id6" >
+        <di:waypoint x="212" y="251" />
+        <di:waypoint x="259" y="158" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id1-id7" >
+        <di:waypoint x="99" y="44" />
+        <di:waypoint x="93" y="158" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id12-id8" >
+        <di:waypoint x="558" y="159" />
+        <di:waypoint x="695" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id8-id10" >
+        <di:waypoint x="695" y="150" />
+        <di:waypoint x="844" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id6-id11" >
+        <di:waypoint x="259" y="158" />
+        <di:waypoint x="373" y="78" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id13-id12" >
+        <di:waypoint x="440" y="221" />
+        <di:waypoint x="558" y="159" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id11-id13" >
+        <di:waypoint x="373" y="78" />
+        <di:waypoint x="440" y="221" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="id7-id14" >
+        <di:waypoint x="93" y="158" />
+        <di:waypoint x="212" y="251" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

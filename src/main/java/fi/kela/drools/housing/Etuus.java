@@ -1,0 +1,9 @@
+package fi.kela.drools.housing;
+
+public enum Etuus {
+	YLEINEN_ASUMISTUKI,
+	ELAKKEENSAAJAN_ASUMISTUKI,
+	OPINTOTUKI,
+	KUNTOUTUS,
+	TYOKYVYTTOMYYSELAKE
+}

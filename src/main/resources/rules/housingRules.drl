@@ -1,0 +1,356 @@
+//created on: 20.3.2019
+package fi.kela.drools.housing
+
+import java.math.BigDecimal;
+
+import fi.kela.drools.housing.Asiakas;
+import fi.kela.drools.housing.EtuusAsia;
+import fi.kela.drools.housing.PaatoksenFraasi;
+import fi.kela.drools.housing.RuokakunnanJasen;
+import fi.kela.drools.housing.PerusteTiedot;
+import fi.kela.drools.housing.AsuntoTiedot;
+import fi.kela.drools.housing.YlatTiedot;
+
+rule "Ruokakunnan koko"
+	ruleflow-group "ruokakunnanKoko"
+	no-loop true
+    when
+       $per:PerusteTiedot(ruokakunnanJasenet.size() > 0)
+       $rat:RatkaisuTiedot()
+       $asiakas:Asiakas()
+       $asia:EtuusAsia()
+    then
+       $per.setRuokakunnanKoko($per.getRuokakunnanJasenet().size());
+       $rat.getFraasit().add(new PaatoksenFraasi("AY002", $asiakas.getKieli(), 
+               $per.getRuokakunnanKoko()+"", $per.ruokakunnanJasenLista()));
+       update($asia)
+end
+
+rule "Ruokakunnan koko, vammaiskorotus"
+	ruleflow-group "vammaiskorotus"
+	no-loop true
+    when
+        $per:PerusteTiedot(!lisatilanTarveHuomioitu)
+  		RuokakunnanJasen(lisatilanTarve)
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+        $asia:EtuusAsia()
+    then
+        // Päivitetään vain kerran, vaikka olisi useampi kuin yksi jolla olisi lisätilan tarvetta
+        // Tätä kontrolloidaan PerusteTietojen "lisatilanTarveHuomioitu" -lipulla - lasketaan vain kerran
+	    int uusiRuokakunnanKoko = $per.getRuokakunnanKoko() + 1;
+        $per.setRuokakunnanKoko(uusiRuokakunnanKoko);
+        $per.setLisatilanTarveHuomioitu(true);
+        $rat.getFraasit().add(new PaatoksenFraasi("AY001", $asiakas.getKieli(), uusiRuokakunnanKoko+""));
+        update($per)
+        update($asia)
+end
+
+rule "Asunnon hyväksytyt hoitomenot, lämmitys"
+	// YLAT 9§
+    //Vuokra-asunnossa asuvan ruokakunnan asumismenoiksi hyväksytään vuokra ja erikseen maksettavat vesimaksut ja lämmityskustannukset.
+    //Erikseen maksettavina vesimaksuina otetaan huomioon 17 euroa henkilöä kohden kuukaudessa..
+    //
+	lock-on-active true
+	ruleflow-group "hoitomenot"
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA || asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE, 
+            lammitysKustannuksetEur.compareTo(new BigDecimal(0)) > 0)
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+        $per:PerusteTiedot()
+    then
+       BigDecimal lammitysKustannukset = new BigDecimal(0);
+       BigDecimal lammitysPohja = new BigDecimal(0);
+       BigDecimal rajaArvo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_LAMMITYS_KK, $per.getAlkuPvm());
+       BigDecimal lisaPerHlo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.LAMMITYS_LISAHLO_KK, $per.getAlkuPvm());
+       int ruokakunnanJasenet = $per.getRuokakunnanJasenet().size();
+       if($asunto.getLammitysKustannuksetEur().compareTo(rajaArvo) > 0){
+           lammitysPohja = rajaArvo;
+       } else {
+           lammitysPohja = $asunto.getLammitysKustannuksetEur();
+       }
+       if(ruokakunnanJasenet == 1){
+           lammitysKustannukset = lammitysPohja;
+       } else if (ruokakunnanJasenet > 1){
+           lammitysKustannukset = lammitysPohja.add((new BigDecimal(ruokakunnanJasenet-1)).multiply(lisaPerHlo)); 
+       }
+       $rat.setLammitysMeno(lammitysKustannukset);
+       $rat.getFraasit().add(new PaatoksenFraasi("AY004", $asiakas.getKieli(),
+           lammitysKustannukset.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       update($asia);
+       update($rat);
+end
+
+rule "Asunnon hyväksytyt hoitomenot, vesi"
+	// YLAT 9§ mom 1
+    //Vuokra-asunnossa asuvan ruokakunnan asumismenoiksi hyväksytään vuokra ja erikseen maksettavat vesimaksut ja lämmityskustannukset.
+    //Erikseen maksettavina lämmityskustannuksina 38 euroa kuukaudessa yhden hengen ruokakunnassa.
+    //Jos ruokakuntaan kuuluu useampi kuin yksi henkilö, lämmityskustannuksiin lisätään 13 euroa jokaista lisähenkilöä kohden.
+    //
+    // Osakeasunnon hoitomenoiksi hyväksytään vastike sekä erikseen maksettavat vesimaksut ja lämmityskustannukset.
+    // Vesimaksut ja lämmityskustannukset otetaan huomioon 1 momentin mukaisina.
+	lock-on-active true
+	ruleflow-group "hoitomenot"
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA || asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE, 
+            vesiPerHenkiloEur.compareTo(new BigDecimal(0)) > 0)
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+        $per:PerusteTiedot()
+    then
+       BigDecimal vesimaksu = new BigDecimal(0);
+       BigDecimal hyvaksyttyVesimaksuPerHlo = new BigDecimal(0);
+       BigDecimal rajaArvo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_VESIMAKSU_HLO_KK, $per.getAlkuPvm());
+       if($asunto.getVesiPerHenkiloEur().compareTo(rajaArvo) > 0) {
+       	   hyvaksyttyVesimaksuPerHlo = rajaArvo;
+       } else {
+       	   hyvaksyttyVesimaksuPerHlo = $asunto.getVesiPerHenkiloEur();
+       }
+       vesimaksu = hyvaksyttyVesimaksuPerHlo.multiply(new BigDecimal($asia.getPerusteTiedot().getRuokakunnanJasenet().size()));
+       $rat.getFraasit().add(new PaatoksenFraasi("AY007", $asiakas.getKieli(), 
+           hyvaksyttyVesimaksuPerHlo.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+           vesimaksu.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       $rat.setVesiMeno(vesimaksu);
+       update($asia);
+end
+
+rule "Vuokra-asunnon hyväksytyt hoitomenot, vuokra"
+    //Vuokra-asunnossa asuvan ruokakunnan asumismenoiksi hyväksytään vuokra ja erikseen maksettavat vesimaksut ja lämmityskustannukset.
+    //
+	lock-on-active true
+	ruleflow-group "hoitomenot"
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.VUOKRA, vuokraEur.compareTo(new BigDecimal(0)) > 0 )
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+    then
+        BigDecimal vuokra = $asunto.getVuokraEur();       
+        $rat.setVuokraMeno(vuokra);
+        $rat.getFraasit().add(new PaatoksenFraasi("AY008", $asiakas.getKieli(),
+            vuokra.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+        update($asia);
+end
+
+rule "Omistusosakkeen hyväksytyt hoitomenot"
+    // Omistusasunnossa asuvan ruokakunnan asumismenoiksi hyväksytään asunnon hoito- ja rahoitusmenot.
+    // Osakeasunnon hoitomenoiksi hyväksytään vastike sekä erikseen maksettavat vesimaksut ja lämmityskustannukset.
+    // Vesimaksut ja lämmityskustannukset otetaan huomioon 1 momentin mukaisina.
+	ruleflow-group "hoitomenot"
+	lock-on-active true
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_OSAKE, vastikeEur.compareTo(new BigDecimal(0)) > 0 )
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+    then
+    	BigDecimal vastike = $asunto.getVastikeEur();
+        $rat.setVastikeMeno(vastike);
+        $rat.getFraasit().add(new PaatoksenFraasi("AY009", $asiakas.getKieli(), vastike.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+        update($asia);
+end
+
+rule "Muun omistusasunnon hyväksytyt hoitomenot"
+    //Muun omistusasunnon hoitomenoiksi hyväksytään:
+    //Ruokakunnan koko henkeä 	Huomioon otettava hoitomeno €/kk
+    //1 	89
+    //2 	107
+    //3 	135
+    //4 	159
+    //Jos ruokakuntaan kuuluu enemmän kuin neljä henkilöä, muun omistusasunnon hoitomenoja korotetaan 49 euroa jokaista neljä henkilöä ylittävää ruokakunnan jäsentä kohden.
+	ruleflow-group "hoitomenot"
+	lock-on-active true
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_MUU)
+        $per:PerusteTiedot(ruokakunnanJasenet.size() > 0)
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+    then
+       BigDecimal hoitoMenot = new BigDecimal(0);
+       int ruokakunnanJasenMaara = $per.getRuokakunnanJasenet().size();
+       switch (ruokakunnanJasenMaara){
+           case 1: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_1HLO, $per.getAlkuPvm()); break;
+           case 2: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_2HLO, $per.getAlkuPvm()); break;
+           case 3: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_3HLO, $per.getAlkuPvm()); break;
+           case 4: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_4HLO, $per.getAlkuPvm()); break;
+           default:
+               BigDecimal hoitoMeno4 = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_4HLO, $per.getAlkuPvm());
+               BigDecimal hoitoMenoYli4 = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_YLI4HLO, $per.getAlkuPvm());
+               hoitoMenot = hoitoMeno4.add((new BigDecimal(ruokakunnanJasenMaara-4)).multiply(hoitoMenoYli4)); 
+               break;
+       }
+       $rat.getFraasit().add(new PaatoksenFraasi("AY006", $asiakas.getKieli(), 
+           hoitoMenot.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(), ruokakunnanJasenMaara+""));
+       $rat.setHoitoMenoMuu(hoitoMenot);
+       update($asia);
+       update($rat);
+end
+
+rule "Omistusasunnon hyväksytyt rahoitusmenot"
+    // Omistusasunnossa asuvan ruokakunnan rahoitusmenoiksi hyväksytään asunnon hankkimiseksi ja perusparantamiseksi otettujen henkilökohtaisten lainojen 
+    // kuukausittaisista koroista 73 prosenttia. Asumisoikeusasunnon menoiksi hyväksytään 73 prosenttia asumisoikeuden hankkimiseksi otettujen henkilökohtaisten 
+    // lainojen kuukausittaisista koroista. Edellä mainittujen lainojen on oltava valtion, kunnan, seurakunnan tai julkisen valvonnan alaisen luottotoimintaa 
+    // harjoittavan laitoksen myöntämiä.
+	ruleflow-group "hoitomenot"
+	no-loop true
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_OSAKE || asunnonTyyppi==AsunnonTyyppi.OMISTUS_MUU,
+            rahoitusMenotEur.compareTo(new BigDecimal(0)) > 0)
+        $per:PerusteTiedot()
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+    then
+       BigDecimal korvattavaOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS, $per.getAlkuPvm());
+       BigDecimal hyvaksytytRahoitusMenot = $asunto.getRahoitusMenotEur().multiply(korvattavaOsuus);
+       $rat.setRahoitusMeno(hyvaksytytRahoitusMenot);
+       $rat.getFraasit().add(new PaatoksenFraasi("AY010", $asiakas.getKieli(), 
+           hyvaksytytRahoitusMenot.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+           korvattavaOsuus.multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+           $asunto.getRahoitusMenotEur().setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       update($asia);
+end
+
+rule "Hyväksytyt hoito- ja lämmitysmenot, korotus maakunnan mukaan, Keski-Suomi"
+    // Edellä 1 ja 2 momentissa mainittuja lämmityskustannuksia sekä 3 ja 4 momentissa mainittuja hoitomenoja korotetaan neljä prosenttia
+    // Etelä-Savon, Pohjois-Savon ja Pohjois-Karjalan maakunnissa ja kahdeksan prosenttia Pohjois-Pohjanmaan, Kainuun ja Lapin maakunnissa.
+	ruleflow-group "hoitomenot-korotukset"
+	salience -5
+	lock-on-active true
+    when
+        $asunto:AsuntoTiedot(lammitysKustannuksetEur.compareTo(new BigDecimal(0)) > 0)
+        $per:PerusteTiedot(asuinMaakunta in ("ETELÄ-SAVO", "POHJOIS-SAVO", "POHJOIS-KARJALA"))
+        $asia:EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+    then
+       BigDecimal korotus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.KUSTANNUS_KOROTUS_ITA, $per.getAlkuPvm());
+       $rat.setLammitysMeno($rat.getLammitysMeno().multiply(new BigDecimal(1.0).add(korotus))); 
+       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus))); 
+       $rat.getFraasit().add(new PaatoksenFraasi("AY005", $asiakas.getKieli(),
+           korotus.multiply(new BigDecimal(100)).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
+           $per.getAsuinMaakunta()));
+       update($asia);
+       update($rat);
+end
+
+rule "Hyväksytyt hoito- ja lämmitysmenot, korotus maakunnan mukaan, Pohjois-Suomi"
+    // Edellä 1 ja 2 momentissa mainittuja lämmityskustannuksia sekä 3 ja 4 momentissa mainittuja hoitomenoja korotetaan neljä prosenttia
+    // Etelä-Savon, Pohjois-Savon ja Pohjois-Karjalan maakunnissa ja kahdeksan prosenttia Pohjois-Pohjanmaan, Kainuun ja Lapin maakunnissa.
+	ruleflow-group "hoitomenot-korotukset"
+	salience -5
+	lock-on-active true
+    when
+        $per:PerusteTiedot(asuinMaakunta in ("POHJOIS-POHJANMAA", "KAINUU", "LAPPI"))
+        $rat:RatkaisuTiedot(hoitoMenoMuu.compareTo(new BigDecimal(0)) > 0 || lammitysMeno.compareTo(new BigDecimal(0)) > 0)
+        $asia: EtuusAsia()
+        $asiakas:Asiakas()
+    then
+       BigDecimal korotus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.KUSTANNUS_KOROTUS_POHJOINEN, $per.getAlkuPvm());
+       $rat.setLammitysMeno($rat.getLammitysMeno().multiply(new BigDecimal(1.0).add(korotus))); 
+       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus))); 
+       $rat.getFraasit().add(new PaatoksenFraasi("AY005", $asiakas.getKieli(), 
+           korotus.multiply(new BigDecimal(100)).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
+           $per.getAsuinMaakunta()));
+       update($asia);
+       update($rat);
+end
+
+rule "Vuokra-asunnon hoitomenot, alivuokralainen"
+    // Jos vuokralla asuvalla ruokakunnalla on alivuokralainen, vähennetään ruokakunnan tässä pykälässä tarkoitetuista asumismenoista 
+    // alivuokralaisen maksaman vuokran määrä.
+	ruleflow-group "hoitomenot"
+	salience -5
+	lock-on-active true
+    when
+        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA, alivuokralaisenMaksamaVuokraEur.compareTo(new BigDecimal(0)) > 0)
+        $asia: EtuusAsia()
+        $rat:RatkaisuTiedot()
+        $asiakas:Asiakas()
+        $per:PerusteTiedot()
+    then
+        BigDecimal alivuokra = $asunto.getAlivuokralaisenMaksamaVuokraEur();
+        BigDecimal vuokraMeno = $rat.getVuokraMeno();
+        BigDecimal uusiVuokraMeno = vuokraMeno.subtract(alivuokra);
+        // Kaipa tämäkin on mahdollista - ei mennä negatiivisen puolelle?
+        if(vuokraMeno.compareTo(alivuokra) < 0){
+        	uusiVuokraMeno = new BigDecimal(0);
+        }
+        $rat.setVuokraMeno(uusiVuokraMeno);
+        $rat.getFraasit().add(new PaatoksenFraasi("AY014", $asiakas.getKieli(), 
+            alivuokra.setScale(2).toString(),
+            vuokraMeno.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+            uusiVuokraMeno.setScale(2).toString()));
+       update($asia);
+       update($rat);
+end
+
+rule "Osakeasunnon hyväksytyt hoito- ja rahoitusmenot, rajaus suhteessa hyväksyttyihin enimmäisasumismenoihin"
+    // Osakeasunnossa asuvan ruokakunnan 2 momentissa tarkoitetuista asunnon hoitomenoista otetaan huomioon enimmäishoitomenoina enintään määrä, 
+    // joka on 30 prosenttia 10 §:ssä tarkoitetuista ruokakunnan enimmäisasumismenoista ja enimmäisrahoitusmenoina enintään määrä, joka on 70 prosenttia 
+    // ruokakunnan enimmäisasumismenoista.
+    // Jos hoitomenot ylittävät enimmäishoitomenot, ylimenevästä osasta otetaan huomioon 73 prosenttia asunnon hyväksyttävinä rahoitusmenoina.
+	ruleflow-group "hoitomeno-rajaus"
+	lock-on-active true
+    when        
+        $asunto: AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE,
+            vastikeEur.compareTo(new BigDecimal(0))>0 || lammitysKustannuksetEur.compareTo(new BigDecimal(0))>0 || 
+                vesiPerHenkiloEur.compareTo(new BigDecimal(0))>0 || rahoitusMenotEur.compareTo(new BigDecimal(0))>0)
+        $per: PerusteTiedot()
+        $rat: RatkaisuTiedot()
+        $asiakas: Asiakas()
+        $asia: EtuusAsia()
+    then
+       BigDecimal maxHoitoMenotOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_HOITOMENOT_OSUUS, $per.getAlkuPvm());
+       BigDecimal maxRahoitusMenotOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_RAHOITUSMENOT_OSUUS, $per.getAlkuPvm());
+       BigDecimal enimmaisHoitoMeno = maxHoitoMenotOsuus.multiply($asia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
+       BigDecimal enimmaisRahoitusMeno = maxRahoitusMenotOsuus.multiply($asia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
+       BigDecimal korvattavaOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS, $per.getAlkuPvm());
+       BigDecimal lisaRahoitusMeno = new BigDecimal(0);
+       if($asia.getRatkaisuTiedot().getHyvaksytytHoitomenotOsakeEur().compareTo(enimmaisHoitoMeno) > 0){
+           lisaRahoitusMeno = $rat.getHyvaksytytHoitomenotOsakeEur().subtract(enimmaisHoitoMeno).multiply(korvattavaOsuus);
+           // Korjataan vastiketta (voisi korjata myös lämmitys- tai vesikustannuksia, mutta tämä selkeämpää?
+           $rat.setVastikeMeno(enimmaisHoitoMeno.subtract($asia.getRatkaisuTiedot().getVesiMeno()).subtract($asia.getRatkaisuTiedot().getLammitysMeno()));
+           $rat.getFraasit().add(new PaatoksenFraasi("AY011", $asiakas.getKieli(), 
+               (maxHoitoMenotOsuus.multiply(new BigDecimal(100))).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
+               $rat.getEnimmaisAsumisMenotEur().setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+               enimmaisHoitoMeno.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       }
+       if($rat.getRahoitusMeno().add(lisaRahoitusMeno).compareTo(enimmaisRahoitusMeno) > 0){
+           $rat.setRahoitusMeno(enimmaisRahoitusMeno);
+           $rat.getFraasit().add(new PaatoksenFraasi("AY012", $asiakas.getKieli(), 
+               (maxRahoitusMenotOsuus.multiply(new BigDecimal(100))).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
+               $asia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
+               enimmaisRahoitusMeno.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       } else if (lisaRahoitusMeno.compareTo(new BigDecimal(0)) > 0){
+           $rat.getFraasit().add(new PaatoksenFraasi("AY013", $asiakas.getKieli(),
+               (korvattavaOsuus.multiply(new BigDecimal(100))).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
+               $rat.getRahoitusMeno().setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(), 
+               $rat.getRahoitusMeno().add(lisaRahoitusMeno).setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+           $rat.setRahoitusMeno($asia.getRatkaisuTiedot().getRahoitusMeno().add(lisaRahoitusMeno));
+       }
+       // Jos päivitetään vain $asia, useampia muita aikaisempia sääntöjä käynnistyy uudelleen
+       // Tätä ei tapahdu muiden sääntöjen kanssa!
+       update($rat);
+end
+
+rule "Omavastuuosuus"
+	ruleflow-group "omavastuu"
+	lock-on-active true
+    when
+       $asia: EtuusAsia()
+    then
+end
+
+rule "Asumismenot"
+	ruleflow-group "asumismenot"
+	lock-on-active true
+    when
+       $asia: EtuusAsia()
+    then
+end
+
