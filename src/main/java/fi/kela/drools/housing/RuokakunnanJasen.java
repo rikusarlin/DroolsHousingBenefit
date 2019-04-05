@@ -1,5 +1,7 @@
 package fi.kela.drools.housing;
 
+import fi.kela.drools.general.Henkilo;
+
 public class RuokakunnanJasen extends Henkilo {
 	private boolean lisatilanTarve = false;
 	

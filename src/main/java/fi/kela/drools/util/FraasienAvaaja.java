@@ -5,9 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.kela.drools.housing.Fraasi;
-import fi.kela.drools.housing.Kieli;
-import fi.kela.drools.housing.PaatoksenFraasi;
+import fi.kela.drools.general.Fraasi;
+import fi.kela.drools.general.Kieli;
+import fi.kela.drools.general.PaatoksenFraasi;
 
 /*
  * Tämä luokka avaa fraasit ja muuttujat halutulla kielellä tekstiksi.

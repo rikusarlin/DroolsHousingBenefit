@@ -1,10 +1,10 @@
 package fi.kela.drools.housing;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
-public class RatkaisuTiedot {
+import fi.kela.drools.general.RatkaisuTiedot;
+
+public class YlatRatkaisuTiedot extends RatkaisuTiedot {
 	BigDecimal enimmaisAsumisMenotEur = new BigDecimal(0);
 	BigDecimal hoitoMenoMuu = new BigDecimal(0);
 	BigDecimal rahoitusMeno = new BigDecimal(0);
@@ -12,8 +12,7 @@ public class RatkaisuTiedot {
 	BigDecimal vastikeMeno = new BigDecimal(0);
 	BigDecimal vesiMeno = new BigDecimal(0);
 	BigDecimal lammitysMeno = new BigDecimal(0);
-	List<PaatoksenFraasi> fraasit = new ArrayList<PaatoksenFraasi>();
-
+	
 	public BigDecimal getEnimmaisAsumisMenotEur() {
 		return enimmaisAsumisMenotEur;
 	}
@@ -84,13 +83,13 @@ public class RatkaisuTiedot {
 	public void setLammitysMeno(BigDecimal lammitysMeno) {
 		this.lammitysMeno = lammitysMeno;
 	}
-
-	public List<PaatoksenFraasi> getFraasit() {
-		return fraasit;
-	}
-
-	public void setFraasit(List<PaatoksenFraasi> fraasit) {
-		this.fraasit = fraasit;
+	
+	public boolean isHoitoMenoja() {
+		return (this.hoitoMenoMuu.compareTo(new BigDecimal(0)) > 0);
 	}
 	
+	public boolean isLammitysMenoja() {
+		return (this.lammitysMeno.compareTo(new BigDecimal(0)) > 0);
+	}
+
 }

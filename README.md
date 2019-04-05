@@ -14,3 +14,21 @@ It would have been nice to try a Domain Specific Language (DSL) too, but we did 
 
 ## Usage
 This is just a set of rules and test cases related to the rules. There is no ReST service or other runtime stuff at the moment.
+
+For Drools test, the test class is TestMaxAsumismenotDrools
+
+## Comparison to Java version
+Class YlatEtuusAsia and test class TestMaxAsumisMenotJava implement the corresponding Java version (Drools rules are translated into Java in the end
+as well. It just a different way to do the same stuff. Some comparison between the two solutions:
+* JUnit tests are way faster for the Java version. This is no big surprise, since we don't have to load Drools, jBPM, read Excel files and translate rules 
+into Java.
+* In my opinion, the Drools based way is more "communicative" (at least compared to this this not-so-polished Java version)
+* The logic of Java solution is more robust. Sometimes Drools surprises you by activating rules you did not expect to activate (and sometimes by not
+activating rules you think should have activated). With Java, things happen just the way you like.
+* I don't think Drools rules could be written by business users. Maybe they could be more readily understood than the Java version.
+* I decided to use BigDecimal numbers - they really don't help very much in making the code easier to understand - for example, compare the following
+
+~~~ 
+max = for4Persons.add((new BigDecimal(householdSize).subtract(new BigDecimal(4)).multiply(over4PerPerson))));
+max = for4Persons + ((householdSize - 4) * over4PerPerson)
+~~~

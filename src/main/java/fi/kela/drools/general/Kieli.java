@@ -1,4 +1,4 @@
-package fi.kela.drools.housing;
+package fi.kela.drools.general;
 
 public enum Kieli {
 	SUOMI,

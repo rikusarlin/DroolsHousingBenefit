@@ -1,4 +1,7 @@
-package fi.kela.drools.housing;
+package fi.kela.drools.general;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Asiakirja {
 	long asiakirjaId;
@@ -6,6 +9,7 @@ public class Asiakirja {
 	String otsikko;
 	String asiakirjanTyyppi; // TOS:ista 
 	String tehtavaLuokka; // TOS:ista
+	List<AsiakirjaSuhde> asiakirjaSuhteet = new ArrayList<AsiakirjaSuhde>();
 	public long getAsiakirjaId() {
 		return asiakirjaId;
 	}
@@ -35,5 +39,11 @@ public class Asiakirja {
 	}
 	public void setTehtavaLuokka(String tehtavaLuokka) {
 		this.tehtavaLuokka = tehtavaLuokka;
+	}
+	public List<AsiakirjaSuhde> getAsiakirjaSuhteet() {
+		return asiakirjaSuhteet;
+	}
+	public void setAsiakirjaSuhteet(List<AsiakirjaSuhde> asiakirjaSuhteet) {
+		this.asiakirjaSuhteet = asiakirjaSuhteet;
 	}
 }

@@ -1,8 +1,6 @@
 package fi.kela.drools.housing;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,6 +39,50 @@ public class YlatTiedot {
 
 	public static BigDecimal MAX_HOITOMENOT_OSUUS_2015 = new BigDecimal(0.30);
 	public static BigDecimal MAX_RAHOITUSMENOT_OSUUS_2015 = new BigDecimal(0.70);
+	
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_1HLO_2015 = new BigDecimal(508);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_2HLO_2015 = new BigDecimal(735);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_3HLO_2015 = new BigDecimal(937);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_4HLO_2015 = new BigDecimal(1095);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_YLI4PERHLO_2015 = new BigDecimal(137);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_1HLO_2018 = new BigDecimal(516);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_2HLO_2018 = new BigDecimal(746);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_3HLO_2018 = new BigDecimal(951);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_4HLO_2018 = new BigDecimal(1111);
+	public static BigDecimal ENIMMAISMENOT_RYHMA1_YLI4PERHLO_2018 = new BigDecimal(139);
+
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_1HLO_2015 = new BigDecimal(492);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_2HLO_2015 = new BigDecimal(706);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_3HLO_2015 = new BigDecimal(890);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_4HLO_2015 = new BigDecimal(1038);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_YLI4PERHLO_2015 = new BigDecimal(130);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_1HLO_2018 = new BigDecimal(499);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_2HLO_2018 = new BigDecimal(717);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_3HLO_2018 = new BigDecimal(903);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_4HLO_2018 = new BigDecimal(1054);
+	public static BigDecimal ENIMMAISMENOT_RYHMA2_YLI4PERHLO_2018 = new BigDecimal(132);
+
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_1HLO_2015 = new BigDecimal(411);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_2HLO_2015 = new BigDecimal(600);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_3HLO_2015 = new BigDecimal(761);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_4HLO_2015 = new BigDecimal(901);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_YLI4PERHLO_2015 = new BigDecimal(123);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_1HLO_2018 = new BigDecimal(396);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_2HLO_2018 = new BigDecimal(579);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_3HLO_2018 = new BigDecimal(734);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_4HLO_2018 = new BigDecimal(869);
+	public static BigDecimal ENIMMAISMENOT_RYHMA3_YLI4PERHLO_2018 = new BigDecimal(119);
+
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_1HLO_2015 = new BigDecimal(362);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_2HLO_2015 = new BigDecimal(527);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_3HLO_2015 = new BigDecimal(675);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_4HLO_2015 = new BigDecimal(804);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_YLI4PERHLO_2015 = new BigDecimal(118);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_1HLO_2018 = new BigDecimal(349);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_2HLO_2018 = new BigDecimal(509);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_3HLO_2018 = new BigDecimal(651);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_4HLO_2018 = new BigDecimal(755);
+	public static BigDecimal ENIMMAISMENOT_RYHMA4_YLI4PERHLO_2018 = new BigDecimal(114);
 
 	public static String MAX_VESIMAKSU_HLO_KK = "MaxVesimaksuHloKk";
 	public static String MAX_LAMMITYS_KK = "MaxLammitysKk";
@@ -55,6 +97,26 @@ public class YlatTiedot {
 	public static String KUSTANNUS_KOROTUS_ITA = "KustannusKorotusKeski";
 	public static String MAX_HOITOMENOT_OSUUS = "MaxHoitoMenotOsuus";
 	public static String MAX_RAHOITUSMENOT_OSUUS = "MaxRahoitusMenotOsuus";
+	public static String ENIMMAISMENOT_RYHMA1_1HLO = "EnimmaisMenot_Ryhma1_1";
+	public static String ENIMMAISMENOT_RYHMA1_2HLO = "EnimmaisMenot_Ryhma1_2";
+	public static String ENIMMAISMENOT_RYHMA1_3HLO = "EnimmaisMenot_Ryhma1_3";
+	public static String ENIMMAISMENOT_RYHMA1_4HLO = "EnimmaisMenot_Ryhma1_4";
+	public static String ENIMMAISMENOT_RYHMA1_YLI4PERHLO = "EnimmaisMenot_Ryhma1_N";
+	public static String ENIMMAISMENOT_RYHMA2_1HLO = "EnimmaisMenot_Ryhma2_1";
+	public static String ENIMMAISMENOT_RYHMA2_2HLO = "EnimmaisMenot_Ryhma2_2";
+	public static String ENIMMAISMENOT_RYHMA2_3HLO = "EnimmaisMenot_Ryhma2_3";
+	public static String ENIMMAISMENOT_RYHMA2_4HLO = "EnimmaisMenot_Ryhma2_4";
+	public static String ENIMMAISMENOT_RYHMA2_YLI4PERHLO = "EnimmaisMenot_Ryhma2_N";
+	public static String ENIMMAISMENOT_RYHMA3_1HLO = "EnimmaisMenot_Ryhma3_1";
+	public static String ENIMMAISMENOT_RYHMA3_2HLO = "EnimmaisMenot_Ryhma3_2";
+	public static String ENIMMAISMENOT_RYHMA3_3HLO = "EnimmaisMenot_Ryhma3_3";
+	public static String ENIMMAISMENOT_RYHMA3_4HLO = "EnimmaisMenot_Ryhma3_4";
+	public static String ENIMMAISMENOT_RYHMA3_YLI4PERHLO = "EnimmaisMenot_Ryhma3_N";
+	public static String ENIMMAISMENOT_RYHMA4_1HLO = "EnimmaisMenot_Ryhma4_1";
+	public static String ENIMMAISMENOT_RYHMA4_2HLO = "EnimmaisMenot_Ryhma4_2";
+	public static String ENIMMAISMENOT_RYHMA4_3HLO = "EnimmaisMenot_Ryhma4_3";
+	public static String ENIMMAISMENOT_RYHMA4_4HLO = "EnimmaisMenot_Ryhma4_4";
+	public static String ENIMMAISMENOT_RYHMA4_YLI4PERHLO = "EnimmaisMenot_Ryhma4_N";
 	
 	static {
 		try {
@@ -119,6 +181,131 @@ public class YlatTiedot {
 		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
 		    	arvo = HOITOMENO_YLI4HLO_2018;
 		}
+		
+		if(tieto.equals(ENIMMAISMENOT_RYHMA1_1HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA1_1HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA1_1HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA1_2HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA1_2HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA1_2HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA1_3HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA1_3HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA1_3HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA1_4HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA1_4HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA1_4HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA1_YLI4PERHLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA1_YLI4PERHLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA1_YLI4PERHLO_2018;
+		}
+
+		if(tieto.equals(ENIMMAISMENOT_RYHMA2_1HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA2_1HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA2_1HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA2_2HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA2_2HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA2_2HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA2_3HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA2_3HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA2_3HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA2_4HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA2_4HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA2_4HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA2_YLI4PERHLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA2_YLI4PERHLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA2_YLI4PERHLO_2018;
+		}
+
+		if(tieto.equals(ENIMMAISMENOT_RYHMA3_1HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA3_1HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA3_1HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA3_2HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA3_2HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA3_2HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA3_3HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA3_3HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA3_3HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA3_4HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA3_4HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA3_4HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA3_YLI4PERHLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA3_YLI4PERHLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA3_YLI4PERHLO_2018;
+		}
+
+		if(tieto.equals(ENIMMAISMENOT_RYHMA4_1HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA4_1HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA4_1HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA4_2HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA4_2HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA4_2HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA4_3HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA4_3HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA4_3HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA4_4HLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA4_4HLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA4_4HLO_2018;
+		}
+		if(tieto.equals(ENIMMAISMENOT_RYHMA4_YLI4PERHLO)) {
+		    if(alkuPvm.after(YLAT_2015_ALKU) && alkuPvm.before(YLAT_2018_ALKU)) {
+		    	arvo =  ENIMMAISMENOT_RYHMA4_YLI4PERHLO_2015;
+		    } else if (alkuPvm.after(YLAT_2018_ALKU) && alkuPvm.before(LOPPU))
+		    	arvo = ENIMMAISMENOT_RYHMA4_YLI4PERHLO_2018;
+		}
+
 		if(tieto.equals(RAHOITUSMENOT_KORVATTAVA_OSUUS)) {
 	    	arvo =  RAHOITUSMENOT_KORVATTAVA_OSUUS_2015;
 		}

@@ -1,37 +1,21 @@
 package fi.kela.drools.housing;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 
-import org.drools.decisiontable.InputType;
-import org.drools.decisiontable.SpreadsheetCompiler;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.kie.api.runtime.KieContainer;
-import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.kela.drools.util.FraasienAvaaja;
-import fi.kela.drools.util.KnowledgeSessionHelper;
 
-public class TestMaxAsumismenot {
+public class TestMaxAsumismenotJava {
 	
-    static Logger logger = LoggerFactory.getLogger(TestMaxAsumismenot.class.getName());
-    static KieContainer kieContainer = null;
-	StatelessKieSession sessionStateless = null;
-	KieSession sessionStateful = null;
+    static Logger logger = LoggerFactory.getLogger(TestMaxAsumismenotJava.class.getName());
     TestiAsiat testiAsiat = new TestiAsiat();
     	
 	@Rule
@@ -41,28 +25,10 @@ public class TestMaxAsumismenot {
 	   }
 	};
 	
-    @BeforeClass
-    public static void beforeClass(){
-        kieContainer=KnowledgeSessionHelper.createRuleBase();
-    }
-
-    @Before
-    public void beforeTest(){
-        sessionStateful = KnowledgeSessionHelper
-	             .getStatefulKnowledgeSessionForJBPM(kieContainer,"ksession-housing");
-    }
-
-    @After
-    public void afterTest(){
-    	sessionStateful.dispose();
-    }
-
     @Test
 	public void testMaxAsumismenotRyhma1Koko1_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getRyhma1Koko1_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-		sessionStateful.startProcess("housingCostsProcess");
-		sessionStateful.fireAllRules();
+		YlatEtuusAsia etuusAsia = testiAsiat.getRyhma1Koko1_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -70,10 +36,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testMaxAsumismenotRyhma1Koko1_2018() {
-		EtuusAsia etuusAsia = testiAsiat.getRyhma1Koko1_2018();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-		sessionStateful.startProcess("housingCostsProcess");
-		sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getRyhma1Koko1_2018();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 516.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(516.0))==0);
@@ -81,10 +45,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testMaxAsumismenotRyhma1Koko5_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getRyhma1Koko5_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-		sessionStateful.startProcess("housingCostsProcess");
-		sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getRyhma1Koko5_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 1232.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(1232.0))==0);
@@ -92,10 +54,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testMaxAsumismenotRyhma1Koko5_2018() {
-		EtuusAsia etuusAsia = testiAsiat.getRyhma1Koko5_2018();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-		sessionStateful.startProcess("housingCostsProcess");
-		sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getRyhma1Koko5_2018();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 1250.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(1250.0))==0);
@@ -103,10 +63,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testMaxAsumismenotRyhma1Koko6_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getRyhma1Koko6_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-		sessionStateful.startProcess("housingCostsProcess");	
-		sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getRyhma1Koko6_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 1369.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(1369.0))==0);
@@ -114,10 +72,8 @@ public class TestMaxAsumismenot {
     
     @Test
 	public void testYksinVuokrallaAsuva_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuva_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuva_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -128,10 +84,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinVuokrallaAsuvaSavo_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaSavo_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
- 	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaSavo_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 411.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(411.0))==0);
@@ -141,10 +95,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinVuokrallaAsuvaAlivuokralaisellaSavo_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaAlivuokralaisellaSavo_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaAlivuokralaisellaSavo_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 411.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(411.0))==0);
@@ -158,10 +110,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinOmistusOsakeEiRahoitusmenoja_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakeEiRahoitusmenoja_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);		
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakeEiRahoitusmenoja_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -171,10 +121,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinOmistusOsakeRahoitusmenoja_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakeRahoitusmenoja_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
- 	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakeRahoitusmenoja_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -184,10 +132,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinOmistusOsakePaljonRahoitusmenojaJaVastiketta_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakePaljonRahoitusmenojaJaVastiketta_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakePaljonRahoitusmenojaJaVastiketta_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -197,24 +143,19 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinOmistusOsakePaljonVastiketta_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakePaljonVastiketta_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinOmistusOsakePaljonVastiketta_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
         logger.info("Expected: 431.698, got:"+etuusAsia.getRatkaisuTiedot().getHyvaksytytAsumismenotEur().setScale(3,BigDecimal.ROUND_HALF_EVEN));
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getHyvaksytytAsumismenotEur().setScale(3,BigDecimal.ROUND_HALF_EVEN).doubleValue()==431.698);
-		sessionStateful.dispose();    	
     }
 
     @Test
 	public void testYksinMuuOmistus_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinMuuOmistus_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinMuuOmistus_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 508.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(508.0))==0);
@@ -224,10 +165,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinMuuOmistusKainuu_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinMuuOmistusKainuu_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinMuuOmistusKainuu_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 362.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(362.0))==0);
@@ -237,10 +176,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void test5HloMuuOmistus_2018() {
-		EtuusAsia etuusAsia = testiAsiat.get5HloMuuOmistus_2018();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.get5HloMuuOmistus_2018();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 1250.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(1250.0))==0);
@@ -250,10 +187,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void test2HloVuokrallaAsuva_2015() {
-		EtuusAsia etuusAsia = testiAsiat.get2HloVuokrallaAsuva_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
- 	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.get2HloVuokrallaAsuva_2015();
+		etuusAsia.laskeMenot();
 		FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 735.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(735.0))==0);
@@ -263,10 +198,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void testYksinVuokrallaAsuvaVammainen_2015() {
-		EtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaVammainen_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.getYksinVuokrallaAsuvaVammainen_2015();
+		etuusAsia.laskeMenot();
 	    FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
         logger.info("Expected: 735.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(735.0))==0);
@@ -276,10 +209,8 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void test2VuokrallaAsuvaaVammaista_2015() {
-		EtuusAsia etuusAsia = testiAsiat.get2VuokrallaAsuvaaVammaista_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.get2VuokrallaAsuvaaVammaista_2015();
+		etuusAsia.laskeMenot();
 	    FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
 	    // 2 hengen osalta Hki max 735, mutta  lisätilan tarvetta => 3 hlö osalta maksimi eli 937
         logger.info("Expected: 937.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
@@ -295,58 +226,18 @@ public class TestMaxAsumismenot {
 
     @Test
 	public void test3VuokrallaAsuvaaVammaista_2015() {
-		EtuusAsia etuusAsia = testiAsiat.get3VuokrallaAsuvaaVammaista_2015();
-		insertHakemusObjectsIntoSession(sessionStateful, etuusAsia);
-	    sessionStateful.startProcess("housingCostsProcess");	
-        sessionStateful.fireAllRules();
+    	YlatEtuusAsia etuusAsia = testiAsiat.get3VuokrallaAsuvaaVammaista_2015();
+		etuusAsia.laskeMenot();
 	    FraasienAvaaja.avaaPaatos(etuusAsia.getRatkaisuTiedot().getFraasit(), etuusAsia.getAsiakas().getKieli());
 	    // 2 hengen osalta Hki max 735, mutta  lisätilan tarvetta => 3 hlö osalta maksimi eli 937
         logger.info("Expected: 1095.0, got:"+etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur().compareTo(new BigDecimal(1095.0))==0);
-        logger.info("Expected: 697.0, got:"+etuusAsia.getRatkaisuTiedot().getHyvaksytytAsumismenotEur().setScale(1,BigDecimal.ROUND_HALF_EVEN));
+        logger.info("Expected: 727.0, got:"+etuusAsia.getRatkaisuTiedot().getHyvaksytytAsumismenotEur().setScale(1,BigDecimal.ROUND_HALF_EVEN));
         // Hyväksytyt asumismenot
         // Vuokra 620 €
         // Vesi 3 x 17 = 51€ (kustannukset 19, hyväksytään vain 17)
         // Lämmitys 30 + 2*13 = 56€ 
         // Yhteensä 727€
         Assert.assertTrue(etuusAsia.getRatkaisuTiedot().getHyvaksytytAsumismenotEur().setScale(1,BigDecimal.ROUND_HALF_EVEN).doubleValue()==727.0);
-    }
-    
-    private void insertHakemusObjectsIntoSession(KieSession session, EtuusAsia etuusAsia) {
-    	session.insert(etuusAsia);
-    	session.insert(etuusAsia.getAsiakas());
-    	if(etuusAsia.getAsiakas().getAsiakkaanTyyppi() == AsiakkaanTyyppi.HENKILO_ASIAKAS) {
-    		session.insert(etuusAsia.getAsiakas().getHenkiloAsiakas());
-    	} else if (etuusAsia.getAsiakas().getAsiakkaanTyyppi() == AsiakkaanTyyppi.TYONANTAJA_ASIAKAS) {
-    		// This we don't have yet...
-    	}
-    	for(RuokakunnanJasen jasen:etuusAsia.getPerusteTiedot().getRuokakunnanJasenet()) {
-    		session.insert(jasen);
-    	}
-    	session.insert(etuusAsia.getPerusteTiedot());
-    	session.insert(etuusAsia.getPerusteTiedot().getAsuntoTiedot());
-    	session.insert(etuusAsia.getRatkaisuTiedot());
-    }
-
-    /*
-     * Uncomment this to see the rules resulting from the decision table
-     * You probably need to change to file name to reflect your setup. 
-     * Sorry about that.
-    @Test
-    public void testCompile() {
-    		  File dtf = new File( "X:\\Workspace\\Photon_maven_utf8_rule_workspace\\DroolsHousingBenefit\\src\\main\\resources\\rules\\MaxAsumisMenot.xls" );
-    		  InputStream is;
-    		  try {
-    		    is = new FileInputStream( dtf );
-    		    SpreadsheetCompiler ssComp = new SpreadsheetCompiler();
-    		    String s = ssComp.compile( is, InputType.XLS );
-    		    System.out.println( "=== Begin generated DRL ===" );
-    		    System.out.println( s );
-    		    System.out.println( "=== End generated DRL ===" );
-    		  } catch (IOException e) {
-    		    // TODO Auto-generated catch block
-    		    e.printStackTrace();
-    		  }
-    }
-    */
+    }    
 }

@@ -2,32 +2,19 @@ package fi.kela.drools.housing;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class PerusteTiedot {
+import fi.kela.drools.general.PerusteTiedot;
+
+public class YlatPerusteTiedot extends PerusteTiedot{
 	private int kuntaRyhma;
 	private String asuinMaakunta;
 	private int ruokakunnanKoko = 0;
-	private Date alkuPvm;
-	private Date loppuPvm;
 	private AsuntoTiedot asuntoTiedot;
 	private boolean alivuokralainen = false;
 	private List<RuokakunnanJasen> ruokakunnanJasenet = new ArrayList<RuokakunnanJasen>();
 	private boolean lisatilanTarveHuomioitu = false;
-	
-	public Date getAlkuPvm() {
-		return alkuPvm;
-	}
-	public void setAlkuPvm(Date alkuPvm) {
-		this.alkuPvm = alkuPvm;
-	}
-	public Date getLoppuPvm() {
-		return loppuPvm;
-	}
-	public void setLoppuPvm(Date loppuPvm) {
-		this.loppuPvm = loppuPvm;
-	}
+
 	public AsuntoTiedot getAsuntoTiedot() {
 		return asuntoTiedot;
 	}
@@ -83,5 +70,28 @@ public class PerusteTiedot {
 	}
 	public void setLisatilanTarveHuomioitu(boolean lisatilanTarveHuomioitu) {
 		this.lisatilanTarveHuomioitu = lisatilanTarveHuomioitu;
+	}
+	public int getRuokakunnanJasenMaara() {
+		return this.getRuokakunnanJasenet().size();
+	}
+	
+	public BigDecimal haeOhjausTieto(String tunnus) {
+		return YlatTiedot.getOhjausTietoBigDecimal(tunnus, this.getAlkuPvm());
+	}
+
+	public boolean isAsuinMaakuntaItaSuomessa() {
+		boolean kyllaEi = false;
+		if(asuinMaakunta != null && (asuinMaakunta.equals("ETELÄ-SAVO") || asuinMaakunta.equals("POHJOIS-SAVO") || asuinMaakunta.equals("POHJOIS-KARJALA"))) {
+			kyllaEi = true;
+		}
+		return kyllaEi;
+	}
+
+	public boolean isAsuinMaakuntaPohjoisSuomessa() {
+		boolean kyllaEi = false;
+		if(asuinMaakunta != null && (asuinMaakunta.equals("POHJOIS-POHJANMAA") || asuinMaakunta.equals("KAINUU") || asuinMaakunta.equals("LAPPI"))) {
+			kyllaEi = true;
+		}
+		return kyllaEi;
 	}
 }

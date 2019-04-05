@@ -67,4 +67,32 @@ public class AsuntoTiedot {
 	public void setAsuinKunta(String asuinKunta) {
 		this.asuinKunta = asuinKunta;
 	}
+	
+	public boolean isVuokraAsunto() {
+		return this.getAsunnonTyyppi()==AsunnonTyyppi.VUOKRA;
+	}
+	public boolean isOmistusOsake() {
+		return this.getAsunnonTyyppi()==AsunnonTyyppi.OMISTUS_OSAKE;
+	}
+	public boolean isMuuOmistus() {
+		return this.getAsunnonTyyppi()==AsunnonTyyppi.OMISTUS_MUU;
+	}
+	public boolean isLammitysKustannuksia() {
+		return this.getLammitysKustannuksetEur().compareTo(new BigDecimal(0))>0;
+	}
+	public boolean isVesiKustannuksia() {
+		return this.getVesiPerHenkiloEur().compareTo(new BigDecimal(0))>0;
+	}
+	public boolean isVuokraa() {
+		return this.getVuokraEur().compareTo(new BigDecimal(0))>0;
+	}
+	public boolean isVastiketta() {
+		return this.getVastikeEur().compareTo(new BigDecimal(0))>0;
+	}
+	public boolean isRahoitusMenoja() {
+		return this.getRahoitusMenotEur().compareTo(new BigDecimal(0))>0;
+	}
+	public boolean isTulojaAlivuokralaisesta() {
+		return this.getAlivuokralaisenMaksamaVuokraEur().compareTo(new BigDecimal(0))>0;
+	}
 }

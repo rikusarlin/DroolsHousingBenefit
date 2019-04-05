@@ -3,26 +3,26 @@ package fi.kela.drools.housing
 
 import java.math.BigDecimal;
 
-import fi.kela.drools.housing.Asiakas;
-import fi.kela.drools.housing.EtuusAsia;
-import fi.kela.drools.housing.PaatoksenFraasi;
+import fi.kela.drools.general.Asiakas;
+import fi.kela.drools.housing.YlatEtuusAsia;
+import fi.kela.drools.general.PaatoksenFraasi;
 import fi.kela.drools.housing.RuokakunnanJasen;
-import fi.kela.drools.housing.PerusteTiedot;
+import fi.kela.drools.housing.YlatPerusteTiedot;
 import fi.kela.drools.housing.AsuntoTiedot;
+import fi.kela.drools.housing.AsunnonTyyppi;
 import fi.kela.drools.housing.YlatTiedot;
 
 rule "Ruokakunnan koko"
 	ruleflow-group "ruokakunnanKoko"
 	no-loop true
     when
-       $per:PerusteTiedot(ruokakunnanJasenet.size() > 0)
-       $rat:RatkaisuTiedot()
+       $per:YlatPerusteTiedot(ruokakunnanJasenMaara > 0)
+       $rat:YlatRatkaisuTiedot()
        $asiakas:Asiakas()
-       $asia:EtuusAsia()
+       $asia:YlatEtuusAsia()
     then
-       $per.setRuokakunnanKoko($per.getRuokakunnanJasenet().size());
-       $rat.getFraasit().add(new PaatoksenFraasi("AY002", $asiakas.getKieli(), 
-               $per.getRuokakunnanKoko()+"", $per.ruokakunnanJasenLista()));
+       $per.setRuokakunnanKoko($per.getRuokakunnanJasenMaara());
+       $asia.lisaaFraasi("AY002");
        update($asia)
 end
 
@@ -30,18 +30,18 @@ rule "Ruokakunnan koko, vammaiskorotus"
 	ruleflow-group "vammaiskorotus"
 	no-loop true
     when
-        $per:PerusteTiedot(!lisatilanTarveHuomioitu)
+        $per:YlatPerusteTiedot(!lisatilanTarveHuomioitu)
   		RuokakunnanJasen(lisatilanTarve)
-        $rat:RatkaisuTiedot()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
-        $asia:EtuusAsia()
+        $asia:YlatEtuusAsia()
     then
         // Päivitetään vain kerran, vaikka olisi useampi kuin yksi jolla olisi lisätilan tarvetta
         // Tätä kontrolloidaan PerusteTietojen "lisatilanTarveHuomioitu" -lipulla - lasketaan vain kerran
 	    int uusiRuokakunnanKoko = $per.getRuokakunnanKoko() + 1;
         $per.setRuokakunnanKoko(uusiRuokakunnanKoko);
         $per.setLisatilanTarveHuomioitu(true);
-        $rat.getFraasit().add(new PaatoksenFraasi("AY001", $asiakas.getKieli(), uusiRuokakunnanKoko+""));
+        $asia.lisaaFraasi("AY001");
         update($per)
         update($asia)
 end
@@ -49,22 +49,22 @@ end
 rule "Asunnon hyväksytyt hoitomenot, lämmitys"
 	// YLAT 9§
     //Vuokra-asunnossa asuvan ruokakunnan asumismenoiksi hyväksytään vuokra ja erikseen maksettavat vesimaksut ja lämmityskustannukset.
-    //Erikseen maksettavina vesimaksuina otetaan huomioon 17 euroa henkilöä kohden kuukaudessa..
+    //Erikseen maksettavina lämmityskustannuksina 38 euroa kuukaudessa yhden hengen ruokakunnassa.
+    //Jos ruokakuntaan kuuluu useampi kuin yksi henkilö, lämmityskustannuksiin lisätään 13 euroa jokaista lisähenkilöä kohden.
     //
 	lock-on-active true
 	ruleflow-group "hoitomenot"
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA || asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE, 
-            lammitysKustannuksetEur.compareTo(new BigDecimal(0)) > 0)
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(vuokraAsunto || omistusOsake, lammitysKustannuksia)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
-        $per:PerusteTiedot()
+        $per:YlatPerusteTiedot()
     then
        BigDecimal lammitysKustannukset = new BigDecimal(0);
        BigDecimal lammitysPohja = new BigDecimal(0);
-       BigDecimal rajaArvo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_LAMMITYS_KK, $per.getAlkuPvm());
-       BigDecimal lisaPerHlo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.LAMMITYS_LISAHLO_KK, $per.getAlkuPvm());
+       BigDecimal rajaArvo = $per.haeOhjausTieto(YlatTiedot.MAX_LAMMITYS_KK);
+       BigDecimal lisaPerHlo = $per.haeOhjausTieto(YlatTiedot.LAMMITYS_LISAHLO_KK);
        int ruokakunnanJasenet = $per.getRuokakunnanJasenet().size();
        if($asunto.getLammitysKustannuksetEur().compareTo(rajaArvo) > 0){
            lammitysPohja = rajaArvo;
@@ -77,8 +77,7 @@ rule "Asunnon hyväksytyt hoitomenot, lämmitys"
            lammitysKustannukset = lammitysPohja.add((new BigDecimal(ruokakunnanJasenet-1)).multiply(lisaPerHlo)); 
        }
        $rat.setLammitysMeno(lammitysKustannukset);
-       $rat.getFraasit().add(new PaatoksenFraasi("AY004", $asiakas.getKieli(),
-           lammitysKustannukset.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       $asia.lisaaFraasi("AY004");
        update($asia);
        update($rat);
 end
@@ -86,34 +85,30 @@ end
 rule "Asunnon hyväksytyt hoitomenot, vesi"
 	// YLAT 9§ mom 1
     //Vuokra-asunnossa asuvan ruokakunnan asumismenoiksi hyväksytään vuokra ja erikseen maksettavat vesimaksut ja lämmityskustannukset.
-    //Erikseen maksettavina lämmityskustannuksina 38 euroa kuukaudessa yhden hengen ruokakunnassa.
-    //Jos ruokakuntaan kuuluu useampi kuin yksi henkilö, lämmityskustannuksiin lisätään 13 euroa jokaista lisähenkilöä kohden.
+    //Erikseen maksettavina vesimaksuina otetaan huomioon 17 euroa henkilöä kohden kuukaudessa.
     //
     // Osakeasunnon hoitomenoiksi hyväksytään vastike sekä erikseen maksettavat vesimaksut ja lämmityskustannukset.
     // Vesimaksut ja lämmityskustannukset otetaan huomioon 1 momentin mukaisina.
 	lock-on-active true
 	ruleflow-group "hoitomenot"
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA || asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE, 
-            vesiPerHenkiloEur.compareTo(new BigDecimal(0)) > 0)
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(vuokraAsunto || omistusOsake, vesiKustannuksia)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
-        $per:PerusteTiedot()
+        $per:YlatPerusteTiedot()
     then
        BigDecimal vesimaksu = new BigDecimal(0);
        BigDecimal hyvaksyttyVesimaksuPerHlo = new BigDecimal(0);
-       BigDecimal rajaArvo = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_VESIMAKSU_HLO_KK, $per.getAlkuPvm());
+       BigDecimal rajaArvo = $per.haeOhjausTieto(YlatTiedot.MAX_VESIMAKSU_HLO_KK);
        if($asunto.getVesiPerHenkiloEur().compareTo(rajaArvo) > 0) {
        	   hyvaksyttyVesimaksuPerHlo = rajaArvo;
        } else {
        	   hyvaksyttyVesimaksuPerHlo = $asunto.getVesiPerHenkiloEur();
        }
        vesimaksu = hyvaksyttyVesimaksuPerHlo.multiply(new BigDecimal($asia.getPerusteTiedot().getRuokakunnanJasenet().size()));
-       $rat.getFraasit().add(new PaatoksenFraasi("AY007", $asiakas.getKieli(), 
-           hyvaksyttyVesimaksuPerHlo.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
-           vesimaksu.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
        $rat.setVesiMeno(vesimaksu);
+       $asia.lisaaFraasi("AY007");
        update($asia);
 end
 
@@ -123,15 +118,13 @@ rule "Vuokra-asunnon hyväksytyt hoitomenot, vuokra"
 	lock-on-active true
 	ruleflow-group "hoitomenot"
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.VUOKRA, vuokraEur.compareTo(new BigDecimal(0)) > 0 )
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(vuokraAsunto, vuokraa)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
     then
-        BigDecimal vuokra = $asunto.getVuokraEur();       
-        $rat.setVuokraMeno(vuokra);
-        $rat.getFraasit().add(new PaatoksenFraasi("AY008", $asiakas.getKieli(),
-            vuokra.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+        $rat.setVuokraMeno($asunto.getVuokraEur());
+        $asia.lisaaFraasi("AY008");
         update($asia);
 end
 
@@ -142,14 +135,13 @@ rule "Omistusosakkeen hyväksytyt hoitomenot"
 	ruleflow-group "hoitomenot"
 	lock-on-active true
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_OSAKE, vastikeEur.compareTo(new BigDecimal(0)) > 0 )
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(omistusOsake, vastiketta)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
     then
-    	BigDecimal vastike = $asunto.getVastikeEur();
-        $rat.setVastikeMeno(vastike);
-        $rat.getFraasit().add(new PaatoksenFraasi("AY009", $asiakas.getKieli(), vastike.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+        $rat.setVastikeMeno($asunto.getVastikeEur());
+        $asia.lisaaFraasi("AY009");
         update($asia);
 end
 
@@ -164,28 +156,27 @@ rule "Muun omistusasunnon hyväksytyt hoitomenot"
 	ruleflow-group "hoitomenot"
 	lock-on-active true
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_MUU)
-        $per:PerusteTiedot(ruokakunnanJasenet.size() > 0)
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(muuOmistus)
+        $per:YlatPerusteTiedot(ruokakunnanJasenMaara > 0)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
     then
        BigDecimal hoitoMenot = new BigDecimal(0);
        int ruokakunnanJasenMaara = $per.getRuokakunnanJasenet().size();
        switch (ruokakunnanJasenMaara){
-           case 1: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_1HLO, $per.getAlkuPvm()); break;
-           case 2: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_2HLO, $per.getAlkuPvm()); break;
-           case 3: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_3HLO, $per.getAlkuPvm()); break;
-           case 4: hoitoMenot = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_4HLO, $per.getAlkuPvm()); break;
+           case 1: hoitoMenot = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_1HLO); break;
+           case 2: hoitoMenot = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_2HLO); break;
+           case 3: hoitoMenot = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_3HLO); break;
+           case 4: hoitoMenot = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_4HLO); break;
            default:
-               BigDecimal hoitoMeno4 = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_4HLO, $per.getAlkuPvm());
-               BigDecimal hoitoMenoYli4 = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.HOITOMENO_YLI4HLO, $per.getAlkuPvm());
+               BigDecimal hoitoMeno4 = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_4HLO);
+               BigDecimal hoitoMenoYli4 = $per.haeOhjausTieto(YlatTiedot.HOITOMENO_YLI4HLO);
                hoitoMenot = hoitoMeno4.add((new BigDecimal(ruokakunnanJasenMaara-4)).multiply(hoitoMenoYli4)); 
                break;
        }
-       $rat.getFraasit().add(new PaatoksenFraasi("AY006", $asiakas.getKieli(), 
-           hoitoMenot.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(), ruokakunnanJasenMaara+""));
        $rat.setHoitoMenoMuu(hoitoMenot);
+       $asia.lisaaFraasi("AY006");
        update($asia);
        update($rat);
 end
@@ -198,20 +189,14 @@ rule "Omistusasunnon hyväksytyt rahoitusmenot"
 	ruleflow-group "hoitomenot"
 	no-loop true
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi==AsunnonTyyppi.OMISTUS_OSAKE || asunnonTyyppi==AsunnonTyyppi.OMISTUS_MUU,
-            rahoitusMenotEur.compareTo(new BigDecimal(0)) > 0)
-        $per:PerusteTiedot()
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(omistusOsake || muuOmistus, rahoitusMenoja)
+        $per:YlatPerusteTiedot()
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
     then
-       BigDecimal korvattavaOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS, $per.getAlkuPvm());
-       BigDecimal hyvaksytytRahoitusMenot = $asunto.getRahoitusMenotEur().multiply(korvattavaOsuus);
-       $rat.setRahoitusMeno(hyvaksytytRahoitusMenot);
-       $rat.getFraasit().add(new PaatoksenFraasi("AY010", $asiakas.getKieli(), 
-           hyvaksytytRahoitusMenot.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
-           korvattavaOsuus.multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
-           $asunto.getRahoitusMenotEur().setScale(2,BigDecimal.ROUND_HALF_EVEN).toString()));
+       $rat.setRahoitusMeno($asunto.getRahoitusMenotEur().multiply($per.haeOhjausTieto(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS)));
+       $asia.lisaaFraasi("AY010");
        update($asia);
 end
 
@@ -222,18 +207,15 @@ rule "Hyväksytyt hoito- ja lämmitysmenot, korotus maakunnan mukaan, Keski-Suom
 	salience -5
 	lock-on-active true
     when
-        $asunto:AsuntoTiedot(lammitysKustannuksetEur.compareTo(new BigDecimal(0)) > 0)
-        $per:PerusteTiedot(asuinMaakunta in ("ETELÄ-SAVO", "POHJOIS-SAVO", "POHJOIS-KARJALA"))
-        $asia:EtuusAsia()
-        $rat:RatkaisuTiedot()
-        $asiakas:Asiakas()
+        $per:YlatPerusteTiedot(asuinMaakuntaItaSuomessa)
+        $rat:YlatRatkaisuTiedot(hoitoMenoja || lammitysMenoja)
+        $asia:YlatEtuusAsia()
+        $asunto:AsuntoTiedot()
     then
-       BigDecimal korotus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.KUSTANNUS_KOROTUS_ITA, $per.getAlkuPvm());
+       BigDecimal korotus = $per.haeOhjausTieto(YlatTiedot.KUSTANNUS_KOROTUS_ITA);
        $rat.setLammitysMeno($rat.getLammitysMeno().multiply(new BigDecimal(1.0).add(korotus))); 
-       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus))); 
-       $rat.getFraasit().add(new PaatoksenFraasi("AY005", $asiakas.getKieli(),
-           korotus.multiply(new BigDecimal(100)).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
-           $per.getAsuinMaakunta()));
+       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus)));
+       $asia.lisaaFraasi("AY005"); 
        update($asia);
        update($rat);
 end
@@ -245,17 +227,15 @@ rule "Hyväksytyt hoito- ja lämmitysmenot, korotus maakunnan mukaan, Pohjois-Su
 	salience -5
 	lock-on-active true
     when
-        $per:PerusteTiedot(asuinMaakunta in ("POHJOIS-POHJANMAA", "KAINUU", "LAPPI"))
-        $rat:RatkaisuTiedot(hoitoMenoMuu.compareTo(new BigDecimal(0)) > 0 || lammitysMeno.compareTo(new BigDecimal(0)) > 0)
-        $asia: EtuusAsia()
-        $asiakas:Asiakas()
+        $per:YlatPerusteTiedot(asuinMaakuntaPohjoisSuomessa)
+        $rat:YlatRatkaisuTiedot(hoitoMenoja || lammitysMenoja)
+        $asia:YlatEtuusAsia()
+        $asunto:AsuntoTiedot()
     then
-       BigDecimal korotus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.KUSTANNUS_KOROTUS_POHJOINEN, $per.getAlkuPvm());
+       BigDecimal korotus = $per.haeOhjausTieto(YlatTiedot.KUSTANNUS_KOROTUS_POHJOINEN);
        $rat.setLammitysMeno($rat.getLammitysMeno().multiply(new BigDecimal(1.0).add(korotus))); 
-       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus))); 
-       $rat.getFraasit().add(new PaatoksenFraasi("AY005", $asiakas.getKieli(), 
-           korotus.multiply(new BigDecimal(100)).setScale(0,BigDecimal.ROUND_HALF_EVEN).toString(),
-           $per.getAsuinMaakunta()));
+       $rat.setHoitoMenoMuu($rat.getHoitoMenoMuu().multiply(new BigDecimal(1.0).add(korotus)));
+       $asia.lisaaFraasi("AY005");  
        update($asia);
        update($rat);
 end
@@ -267,11 +247,11 @@ rule "Vuokra-asunnon hoitomenot, alivuokralainen"
 	salience -5
 	lock-on-active true
     when
-        $asunto:AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.VUOKRA, alivuokralaisenMaksamaVuokraEur.compareTo(new BigDecimal(0)) > 0)
-        $asia: EtuusAsia()
-        $rat:RatkaisuTiedot()
+        $asunto:AsuntoTiedot(vuokraAsunto, tulojaAlivuokralaisesta)
+        $asia: YlatEtuusAsia()
+        $rat:YlatRatkaisuTiedot()
         $asiakas:Asiakas()
-        $per:PerusteTiedot()
+        $per:YlatPerusteTiedot()
     then
         BigDecimal alivuokra = $asunto.getAlivuokralaisenMaksamaVuokraEur();
         BigDecimal vuokraMeno = $rat.getVuokraMeno();
@@ -281,12 +261,9 @@ rule "Vuokra-asunnon hoitomenot, alivuokralainen"
         	uusiVuokraMeno = new BigDecimal(0);
         }
         $rat.setVuokraMeno(uusiVuokraMeno);
-        $rat.getFraasit().add(new PaatoksenFraasi("AY014", $asiakas.getKieli(), 
-            alivuokra.setScale(2).toString(),
-            vuokraMeno.setScale(2,BigDecimal.ROUND_HALF_EVEN).toString(),
-            uusiVuokraMeno.setScale(2).toString()));
-       update($asia);
-       update($rat);
+        $asia.lisaaFraasi("AY014");
+        update($asia);
+        update($rat);
 end
 
 rule "Osakeasunnon hyväksytyt hoito- ja rahoitusmenot, rajaus suhteessa hyväksyttyihin enimmäisasumismenoihin"
@@ -297,19 +274,17 @@ rule "Osakeasunnon hyväksytyt hoito- ja rahoitusmenot, rajaus suhteessa hyväks
 	ruleflow-group "hoitomeno-rajaus"
 	lock-on-active true
     when        
-        $asunto: AsuntoTiedot(asunnonTyyppi == AsunnonTyyppi.OMISTUS_OSAKE,
-            vastikeEur.compareTo(new BigDecimal(0))>0 || lammitysKustannuksetEur.compareTo(new BigDecimal(0))>0 || 
-                vesiPerHenkiloEur.compareTo(new BigDecimal(0))>0 || rahoitusMenotEur.compareTo(new BigDecimal(0))>0)
-        $per: PerusteTiedot()
-        $rat: RatkaisuTiedot()
-        $asiakas: Asiakas()
-        $asia: EtuusAsia()
+        $asunto:AsuntoTiedot(omistusOsake, vastiketta|| lammitysKustannuksia || vesiKustannuksia || rahoitusMenoja)
+        $per:YlatPerusteTiedot()
+        $rat:YlatRatkaisuTiedot()
+        $asiakas:Asiakas()
+        $asia:YlatEtuusAsia()
     then
-       BigDecimal maxHoitoMenotOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_HOITOMENOT_OSUUS, $per.getAlkuPvm());
-       BigDecimal maxRahoitusMenotOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.MAX_RAHOITUSMENOT_OSUUS, $per.getAlkuPvm());
+       BigDecimal maxHoitoMenotOsuus = $per.haeOhjausTieto(YlatTiedot.MAX_HOITOMENOT_OSUUS);
+       BigDecimal maxRahoitusMenotOsuus = $per.haeOhjausTieto(YlatTiedot.MAX_RAHOITUSMENOT_OSUUS);
        BigDecimal enimmaisHoitoMeno = maxHoitoMenotOsuus.multiply($asia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
        BigDecimal enimmaisRahoitusMeno = maxRahoitusMenotOsuus.multiply($asia.getRatkaisuTiedot().getEnimmaisAsumisMenotEur());
-       BigDecimal korvattavaOsuus = YlatTiedot.getOhjausTietoBigDecimal(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS, $per.getAlkuPvm());
+       BigDecimal korvattavaOsuus = $per.haeOhjausTieto(YlatTiedot.RAHOITUSMENOT_KORVATTAVA_OSUUS);
        BigDecimal lisaRahoitusMeno = new BigDecimal(0);
        if($asia.getRatkaisuTiedot().getHyvaksytytHoitomenotOsakeEur().compareTo(enimmaisHoitoMeno) > 0){
            lisaRahoitusMeno = $rat.getHyvaksytytHoitomenotOsakeEur().subtract(enimmaisHoitoMeno).multiply(korvattavaOsuus);
@@ -342,7 +317,7 @@ rule "Omavastuuosuus"
 	ruleflow-group "omavastuu"
 	lock-on-active true
     when
-       $asia: EtuusAsia()
+       $asia: YlatEtuusAsia()
     then
 end
 
@@ -350,7 +325,7 @@ rule "Asumismenot"
 	ruleflow-group "asumismenot"
 	lock-on-active true
     when
-       $asia: EtuusAsia()
+       $asia: YlatEtuusAsia()
     then
 end
 
