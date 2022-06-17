@@ -13,7 +13,7 @@
   <description>Drools rules, decision table and jBPM process to calculate part of Finnish Housing Benefit</description>
 
   <properties>
-    <runtime.version>7.0.0.Final</runtime.version>
+    <runtime.version>7.60.0.Final</runtime.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
